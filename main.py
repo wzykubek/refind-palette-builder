@@ -85,6 +85,8 @@ font themes/{self.name}/fonts/{self.font}"""
                 svg2png(url=f"{self.build_dir}/svg/{directory}/{filename}", write_to=f"{self.dist_dir}/icons/{filename.replace('svg', 'png')}")
 
         self.generate_refind_conf()
+        os.mkdir(f"{self.dist_dir}/fonts")
+        # TODO: move fonts to dist directory
 
 def main():
     theme = Theme()
