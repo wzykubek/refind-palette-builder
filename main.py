@@ -54,6 +54,22 @@ class Theme():
                 f.write(data)
                 f.close()
 
+    def generate_refind_conf(self):
+        string = f"""# Name: {self.name}
+# Generated with refind-palette-builder
+
+icons_dir themes/{self.name}/icons
+big_icon_size 128
+small_icon_size 48
+banner themes/{self.name}/icons/bg.png
+selection_big themes/{self.name}/icons/selection-big.png
+selection_small themes/{self.name}/icons/selection-small.png
+font themes/{self.name}/fonts/{self.font}"""
+        
+        with open(f"{self.dist_dir}/theme.conf", "w+") as f:
+            f.write(string)
+            f.close()
+
     def build(self):
         self.prepare_build()
         self.parse_config()
@@ -67,6 +83,8 @@ class Theme():
         for directory in os.listdir(f"{self.build_dir}/svg"):
             for filename in os.listdir(f"{self.build_dir}/svg/{directory}"):
                 svg2png(url=f"{self.build_dir}/svg/{directory}/{filename}", write_to=f"{self.dist_dir}/icons/{filename.replace('svg', 'png')}")
+
+        self.generate_refind_conf()
 
 def main():
     theme = Theme()
