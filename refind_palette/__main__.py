@@ -1,6 +1,6 @@
 import argparse
-from refind_palette.palette import Palette
-from refind_palette.generator import Generator
+from .palette import Palette
+from .generator import Generator
 import os
 
 parser = argparse.ArgumentParser(
