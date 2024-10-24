@@ -1,0 +1,19 @@
+[tool.poetry]
+name = "refind-palette-builder"
+version = "0.1.0"
+description = "Tool for generating rEFInd color palette based on regular theme."
+authors = ["Wiktor Zykubek <wz-git@mailbox.org>"]
+license = "ISC"
+readme = "readme.md"
+packages = [{ include = "refind_palette" }]
+
+[tool.poetry.dependencies]
+python = "^3.12"
+CairoSVG = "^2.7.1"
+
+[tool.poetry.group.dev.dependencies]
+black = "^24.10.0"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"

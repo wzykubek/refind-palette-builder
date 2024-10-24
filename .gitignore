@@ -1,4 +1,6 @@
+__pycache__/
 .venv/
 dist/
 build/
 config.ini
+*.lock
