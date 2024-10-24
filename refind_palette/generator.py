@@ -13,13 +13,15 @@ class Generator:
     def prepare_build(self):
         self.src_directory = os.path.join(self.working_directory, "src")
         self.build_directory = os.path.join(self.working_directory, "build")
-        self.dist_directory = os.path.join(self.working_directory, "dist")
+        self.dist_directory = os.path.join(
+            self.working_directory, "dist", self.palette.name
+        )
 
         try:
             os.mkdir(self.build_directory)
             os.mkdir(os.path.join(self.build_directory, "svg"))
 
-            os.mkdir(self.dist_directory)
+            os.makedirs(self.dist_directory)
             os.mkdir(os.path.join(self.dist_directory, "icons"))
             os.mkdir(os.path.join(self.dist_directory, "fonts"))
         except FileExistsError:
