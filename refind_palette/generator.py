@@ -6,24 +6,28 @@ from cairosvg import svg2png
 
 
 class Generator:
-    def __init__(self, palette: Palette):
+    def __init__(self, palette: Palette, working_directory: str):
         self.palette = palette
-        self.src_directory = "src"
-        self.build_directory = "build"
-        self.dist_directory = "dist"
+        self.working_directory = working_directory
 
     def prepare_build(self):
+        self.src_directory = os.path.join(self.working_directory, "src")
+        self.build_directory = os.path.join(self.working_directory, "build")
+        self.dist_directory = os.path.join(self.working_directory, "dist")
+
         try:
             os.mkdir(self.build_directory)
-            os.mkdir(f"{self.build_directory}/svg")
+            os.mkdir(os.path.join(self.build_directory, "svg"))
+
             os.mkdir(self.dist_directory)
-            os.mkdir(f"{self.dist_directory}/icons")
+            os.mkdir(os.path.join(self.dist_directory, "icons"))
+            os.mkdir(os.path.join(self.dist_directory, "fonts"))
         except FileExistsError:
             pass
 
-        for directory in os.listdir(f"{self.src_directory}/svg"):
+        for directory in os.listdir(os.path.join(self.src_directory, "svg")):
             try:
-                os.mkdir(f"{self.build_directory}/svg/{directory}")
+                os.mkdir(os.path.join(self.build_directory, "svg", directory))
             except FileExistsError:
                 pass
 
@@ -36,11 +40,13 @@ class Generator:
             return data
 
     def process_icons(self, type: str, color):
-        for filename in os.listdir(f"{self.src_directory}/svg/{type}"):
+        for filename in os.listdir(os.path.join(self.src_directory, "svg", type)):
             data = self.colorize_svg(
-                f"{self.src_directory}/svg/{type}/{filename}", color
+                os.path.join(self.src_directory, "svg", type, filename), color
             )
-            with open(f"{self.build_directory}/svg/{type}/{filename}", "w+") as f:
+            with open(
+                os.path.join(self.build_directory, "svg", type, filename), "w+"
+            ) as f:
                 f.write(data)
                 f.close()
 
@@ -57,7 +63,7 @@ selection_small themes/{self.palette.name}/icons/selection-small.png
 font themes/{self.palette.name}/fonts/{self.palette.font}
 """
 
-        with open(f"{self.dist_directory}/theme.conf", "w+") as f:
+        with open(os.path.join(self.dist_directory, "theme.conf"), "w+") as f:
             f.write(string)
             f.close()
 
@@ -67,19 +73,21 @@ font themes/{self.palette.name}/fonts/{self.palette.font}
         self.process_icons("sel", self.palette.background)
         self.process_icons("but", self.palette.background)
         self.process_icons("ind", self.palette.background)
-        for filename in os.listdir(f"{self.src_directory}/svg/os"):
+        for filename in os.listdir(os.path.join(self.src_directory, "svg", "os")):
             shutil.copy(
-                f"{self.src_directory}/svg/os/{filename}",
-                f"{self.build_directory}/svg/os",
+                os.path.join(self.src_directory, "svg", "os", filename),
+                os.path.join(self.build_directory, "svg", "os"),
             )
 
-        for directory in os.listdir(f"{self.build_directory}/svg"):
-            for filename in os.listdir(f"{self.build_directory}/svg/{directory}"):
+        for directory in os.listdir(os.path.join(self.build_directory, "svg")):
+            for filename in os.listdir(
+                os.path.join(self.build_directory, "svg", directory)
+            ):
                 svg2png(
-                    url=f"{self.build_directory}/svg/{directory}/{filename}",
-                    write_to=f"{self.dist_directory}/icons/{filename.replace('svg', 'png')}",
+                    url=os.path.join(self.build_directory, "svg", directory, filename),
+                    write_to=os.path.join(
+                        self.dist_directory, "icons", filename.replace("svg", "png")
+                    ),
                 )
 
         self.generate_refind_conf()
-        os.mkdir(f"{self.dist_directory}/fonts")
-        # TODO: move fonts to dist directory
