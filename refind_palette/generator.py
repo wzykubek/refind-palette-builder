@@ -40,9 +40,15 @@ class Generator:
             return data
 
     def process_icons(self, directory: str, color):
-        for filename in os.listdir(directory):
-            data = self.colorize_svg(os.path.join(directory, filename), color)
-            with open(os.path.join(directory, filename), "w+") as f:
+        src_svg_directory = os.path.join(self.src_directory, "svg")
+        build_svg_directory = os.path.join(self.build_directory, "svg")
+        for filename in os.listdir(os.path.join(src_svg_directory, directory)):
+            data = self.colorize_svg(
+                os.path.join(src_svg_directory, directory, filename), color
+            )
+            with open(
+                os.path.join(build_svg_directory, directory, filename), "w+"
+            ) as f:
                 f.write(data)
                 f.close()
 
@@ -68,16 +74,10 @@ font themes/{self.palette.name}/fonts/{self.palette.font}
         src_svg_directory = os.path.join(self.src_directory, "svg")
         build_svg_directory = os.path.join(self.build_directory, "svg")
         dist_icons_directory = os.path.join(self.dist_directory, "icons")
-        self.process_icons(
-            os.path.join(src_svg_directory, "bg"), self.palette.background
-        )
-        self.process_icons(
-            os.path.join(src_svg_directory, "sel"), self.palette.selection
-        )
-        self.process_icons(os.path.join(src_svg_directory, "but"), self.palette.button)
-        self.process_icons(
-            os.path.join(src_svg_directory, "ind"), self.palette.indicator
-        )
+        self.process_icons("bg", self.palette.background)
+        self.process_icons("sel", self.palette.selection)
+        self.process_icons("but", self.palette.button)
+        self.process_icons("ind", self.palette.indicator)
         for filename in os.listdir(os.path.join(src_svg_directory, "os")):
             shutil.copy(
                 os.path.join(src_svg_directory, "os", filename),
