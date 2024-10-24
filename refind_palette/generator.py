@@ -39,14 +39,10 @@ class Generator:
 
             return data
 
-    def process_icons(self, type: str, color):
-        for filename in os.listdir(os.path.join(self.src_directory, "svg", type)):
-            data = self.colorize_svg(
-                os.path.join(self.src_directory, "svg", type, filename), color
-            )
-            with open(
-                os.path.join(self.build_directory, "svg", type, filename), "w+"
-            ) as f:
+    def process_icons(self, directory: str, color):
+        for filename in os.listdir(directory):
+            data = self.colorize_svg(os.path.join(directory, filename), color)
+            with open(os.path.join(directory, filename), "w+") as f:
                 f.write(data)
                 f.close()
 
@@ -69,24 +65,31 @@ font themes/{self.palette.name}/fonts/{self.palette.font}
 
     def build(self):
         self.prepare_build()
-        self.process_icons("bg", self.palette.background)
-        self.process_icons("sel", self.palette.background)
-        self.process_icons("but", self.palette.background)
-        self.process_icons("ind", self.palette.background)
-        for filename in os.listdir(os.path.join(self.src_directory, "svg", "os")):
+        src_svg_directory = os.path.join(self.src_directory, "svg")
+        build_svg_directory = os.path.join(self.build_directory, "svg")
+        dist_icons_directory = os.path.join(self.dist_directory, "icons")
+        self.process_icons(
+            os.path.join(src_svg_directory, "bg"), self.palette.background
+        )
+        self.process_icons(
+            os.path.join(src_svg_directory, "sel"), self.palette.selection
+        )
+        self.process_icons(os.path.join(src_svg_directory, "but"), self.palette.button)
+        self.process_icons(
+            os.path.join(src_svg_directory, "ind"), self.palette.indicator
+        )
+        for filename in os.listdir(os.path.join(src_svg_directory, "os")):
             shutil.copy(
-                os.path.join(self.src_directory, "svg", "os", filename),
-                os.path.join(self.build_directory, "svg", "os"),
+                os.path.join(src_svg_directory, "os", filename),
+                os.path.join(build_svg_directory, "os"),
             )
 
-        for directory in os.listdir(os.path.join(self.build_directory, "svg")):
-            for filename in os.listdir(
-                os.path.join(self.build_directory, "svg", directory)
-            ):
+        for directory in os.listdir(build_svg_directory):
+            for filename in os.listdir(os.path.join(build_svg_directory, directory)):
                 svg2png(
-                    url=os.path.join(self.build_directory, "svg", directory, filename),
+                    url=os.path.join(build_svg_directory, directory, filename),
                     write_to=os.path.join(
-                        self.dist_directory, "icons", filename.replace("svg", "png")
+                        dist_icons_directory, filename.replace("svg", "png")
                     ),
                 )
 
