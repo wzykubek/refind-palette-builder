@@ -11,23 +11,21 @@ class Generator:
         self.palette = palette
         self.wd = working_directory
 
-    def colorize_svg(self, file_path: str, color: str):
-        with open(file_path, "r") as f:
-            data = f.read()
-            data = re.sub(r"fill:.*?;", f"fill:{color};", data)
-            f.close()
+    def colorize_svg(self, svg_data: str, color: str):
+        return re.sub(r"fill:.*?;", f"fill:{color};", svg_data)
 
-            return data
-
-    def process_icons(self, directory: str, color):
+    def process_icon_dir(self, directory: str, color):
         for filename in os.listdir(self.wd.src("svg", directory)):
-            data = self.colorize_svg(self.wd.src("svg", directory, filename), color)
-            with open(self.wd.build("svg", directory, filename), "w+") as f:
-                f.write(data)
-                f.close()
+            with open(self.wd.src("svg", directory, filename), "r") as svg_src_file:
+                svg_build_data = self.colorize_svg(svg_src_file.read(), color)
+                with open(
+                    self.wd.build("svg", directory, filename), "w+"
+                ) as svg_build_file:
+                    svg_build_file.write(svg_build_data)
+                    svg_build_file.close()
 
     def generate_refind_conf(self):
-        string = f"""# Name: {self.palette.name}
+        config = f"""# Name: {self.palette.name}
 # Generated with refind-palette-builder
 
 icons_dir themes/{self.palette.name}/icons
@@ -39,15 +37,15 @@ selection_small themes/{self.palette.name}/icons/selection-small.png
 font themes/{self.palette.name}/fonts/{self.palette.font}
 """
 
-        with open(self.wd.dist("theme.conf"), "w+") as f:
-            f.write(string)
-            f.close()
+        with open(self.wd.dist("theme.conf"), "w+") as refind_conf:
+            refind_conf.write(config)
+            refind_conf.close()
 
     def build(self):
-        self.process_icons("bg", self.palette.background)
-        self.process_icons("sel", self.palette.selection)
-        self.process_icons("but", self.palette.button)
-        self.process_icons("ind", self.palette.indicator)
+        self.process_icon_dir("bg", self.palette.background)
+        self.process_icon_dir("sel", self.palette.selection)
+        self.process_icon_dir("but", self.palette.button)
+        self.process_icon_dir("ind", self.palette.indicator)
         for filename in os.listdir(self.wd.src("svg", "os")):
             shutil.copy(
                 self.wd.src("svg", "os", filename),

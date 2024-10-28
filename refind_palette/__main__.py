@@ -16,7 +16,5 @@ args = parser.parse_args()
 
 palette = Palette(args.config)
 wd = WorkingDirectory(root=args.working_directory, palette_name=palette.name)
-generator = Generator(
-    palette=palette, working_directory=wd
-)
+generator = Generator(palette=palette, working_directory=wd)
 generator.build()
