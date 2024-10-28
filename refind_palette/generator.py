@@ -1,4 +1,5 @@
 from refind_palette.palette import Palette
+from refind_palette.working_directory import WorkingDirectory
 import os
 import shutil
 import re
@@ -6,32 +7,9 @@ from cairosvg import svg2png
 
 
 class Generator:
-    def __init__(self, palette: Palette, working_directory: str):
+    def __init__(self, palette: Palette, working_directory: WorkingDirectory):
         self.palette = palette
-        self.working_directory = working_directory
-
-    def prepare_build(self):
-        self.src_directory = os.path.join(self.working_directory, "src")
-        self.build_directory = os.path.join(self.working_directory, "build")
-        self.dist_directory = os.path.join(
-            self.working_directory, "dist", self.palette.name
-        )
-
-        try:
-            os.mkdir(self.build_directory)
-            os.mkdir(os.path.join(self.build_directory, "svg"))
-
-            os.makedirs(self.dist_directory)
-            os.mkdir(os.path.join(self.dist_directory, "icons"))
-            os.mkdir(os.path.join(self.dist_directory, "fonts"))
-        except FileExistsError:
-            pass
-
-        for directory in os.listdir(os.path.join(self.src_directory, "svg")):
-            try:
-                os.mkdir(os.path.join(self.build_directory, "svg", directory))
-            except FileExistsError:
-                pass
+        self.wd = working_directory
 
     def colorize_svg(self, file_path: str, color: str):
         with open(file_path, "r") as f:
@@ -42,15 +20,9 @@ class Generator:
             return data
 
     def process_icons(self, directory: str, color):
-        src_svg_directory = os.path.join(self.src_directory, "svg")
-        build_svg_directory = os.path.join(self.build_directory, "svg")
-        for filename in os.listdir(os.path.join(src_svg_directory, directory)):
-            data = self.colorize_svg(
-                os.path.join(src_svg_directory, directory, filename), color
-            )
-            with open(
-                os.path.join(build_svg_directory, directory, filename), "w+"
-            ) as f:
+        for filename in os.listdir(self.wd.src("svg", directory)):
+            data = self.colorize_svg(self.wd.src("svg", directory, filename), color)
+            with open(self.wd.build("svg", directory, filename), "w+") as f:
                 f.write(data)
                 f.close()
 
@@ -67,32 +39,26 @@ selection_small themes/{self.palette.name}/icons/selection-small.png
 font themes/{self.palette.name}/fonts/{self.palette.font}
 """
 
-        with open(os.path.join(self.dist_directory, "theme.conf"), "w+") as f:
+        with open(self.wd.dist("theme.conf"), "w+") as f:
             f.write(string)
             f.close()
 
     def build(self):
-        self.prepare_build()
-        src_svg_directory = os.path.join(self.src_directory, "svg")
-        build_svg_directory = os.path.join(self.build_directory, "svg")
-        dist_icons_directory = os.path.join(self.dist_directory, "icons")
         self.process_icons("bg", self.palette.background)
         self.process_icons("sel", self.palette.selection)
         self.process_icons("but", self.palette.button)
         self.process_icons("ind", self.palette.indicator)
-        for filename in os.listdir(os.path.join(src_svg_directory, "os")):
+        for filename in os.listdir(self.wd.src("svg", "os")):
             shutil.copy(
-                os.path.join(src_svg_directory, "os", filename),
-                os.path.join(build_svg_directory, "os"),
+                self.wd.src("svg", "os", filename),
+                self.wd.build("svg", "os"),
             )
 
-        for directory in os.listdir(build_svg_directory):
-            for filename in os.listdir(os.path.join(build_svg_directory, directory)):
+        for directory in os.listdir(self.wd.build("svg")):
+            for filename in os.listdir(self.wd.build("svg", directory)):
                 svg2png(
-                    url=os.path.join(build_svg_directory, directory, filename),
-                    write_to=os.path.join(
-                        dist_icons_directory, filename.replace("svg", "png")
-                    ),
+                    url=self.wd.build("svg", directory, filename),
+                    write_to=self.wd.dist("icons", filename.replace("svg", "png")),
                 )
 
         self.generate_refind_conf()

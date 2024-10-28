@@ -1,6 +1,7 @@
 import argparse
 from .palette import Palette
 from .generator import Generator
+from .working_directory import WorkingDirectory
 import os
 
 parser = argparse.ArgumentParser(
@@ -14,7 +15,8 @@ parser.add_argument("-w", "--working-directory", default=os.getcwd())
 args = parser.parse_args()
 
 palette = Palette(args.config)
+wd = WorkingDirectory(root=args.working_directory, palette_name=palette.name)
 generator = Generator(
-    palette=palette, working_directory=os.path.abspath(args.working_directory)
+    palette=palette, working_directory=wd
 )
 generator.build()
