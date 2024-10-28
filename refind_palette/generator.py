@@ -34,7 +34,7 @@ small_icon_size 48
 banner themes/{self.palette.name}/icons/bg.png
 selection_big themes/{self.palette.name}/icons/selection-big.png
 selection_small themes/{self.palette.name}/icons/selection-small.png
-font themes/{self.palette.name}/fonts/{self.palette.font}
+# font themes/{self.palette.name}/fonts/{self.palette.font}
 """
 
         with open(self.wd.dist("theme.conf"), "w+") as refind_conf:
